@@ -1,15 +1,8 @@
 config.cfg
-apps/
-bin/
 contours/*.pbf
-contours-out/
 data/contours.txt
 data/*.poly
 data/*.zip
-gmapsupp/
-hgt/
-osm-dl/
 style-contours/lines
 style-contours/options
 style-contours/version
-tmp/
