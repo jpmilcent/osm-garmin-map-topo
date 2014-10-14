@@ -1,5 +1,13 @@
 #!/bin/bash
+#
+# Generate for France a topographic gmapsupp.img file to use with Garmin GPS
+# It uses the data from : 
+# - OpenStreetMap : http://www.openstreetmap.org/copyright
+# - Nasa : http://www2.jpl.nasa.gov/srtm/
+#
 # Encoding : UTF-8
+# Licence : GPL v2
+# Copyright Jean-Pascal Milcent, 2014
 # Dependances : java, mkgmap, python, phyghtmap
 
 TIME_START=$(date +%s)
@@ -59,6 +67,20 @@ fi
 # Download ressources
 if [ ! -f ${DIR_DATA}/sea_${SEA_VERSION}.zip ] ; then
 	wget http://osm2.pleiades.uni-wuppertal.de/sea/${SEA_VERSION}/sea_${SEA_VERSION}.zip -O ${DIR_DATA}/sea_${SEA_VERSION}.zip
+fi
+
+# Configure style & data
+if [ ! -f ${DIR_STYLE}/lines ] ; then
+	mv ${DIR_STYLE}/lines.defaut ${DIR_STYLE}/lines
+fi
+if [ ! -f ${DIR_STYLE}/options ] ; then
+	mv ${DIR_STYLE}/options.defaut ${DIR_STYLE}/options
+fi
+if [ ! -f ${DIR_STYLE}/version ] ; then
+	mv ${DIR_STYLE}/version.defaut ${DIR_STYLE}/version
+fi
+if [ ! -f ${DIR_DATA}/contours.txt ] ; then
+	mv ${DIR_DATA}/contours.default.txt ${DIR_DATA}/contours.txt
 fi
 
 # Create pbf files for topo

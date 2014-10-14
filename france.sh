@@ -1,5 +1,12 @@
 #!/bin/bash
+
+# Generate for France a gmapsupp.img file to use with Garmin GPS
+# It uses the OpenStreetMap data : http://www.openstreetmap.org/copyright
+#
 # Encoding : UTF-8
+# Licence : GPL v2
+# Copyright Jean-Pascal Milcent, 2014
+# Dependances : java, mkgmap, splitter, osm-c-tools (osmconvert, osmupdate)
 
 TIME_START=$(date +%s)
 AREA="france"
@@ -138,7 +145,13 @@ if [ -d "${DIR_MAP}" ]; then
 fi
 mkdir ${DIR_MAP}
 cd ${DIR_MAP}
-java -Xmx${JAVA_XMX} -jar ${DIR_BIN}/splitter/splitter.jar --mapid=53267593 --mixed=yes --max-nodes=5000000 --output-dir=./splitter-out --description=${AREA_NAME} ${DIR_OSM}/${AREA}.o5m > splitter.log
+java -Xmx${JAVA_XMX} -jar ${DIR_BIN}/splitter/splitter.jar \
+ --mapid=53267593 \
+ --mixed=yes \
+ --max-nodes=5000000 \
+ --output-dir=./splitter-out \
+ --description="${AREA_NAME}" \
+ ${DIR_OSM}/${AREA}.o5m > splitter.log
 
 # Create the .img file with the o5m file split parts
 echo -e "${Yel}Creating the gmapsupp.img file with mkgmap...${RCol}";
