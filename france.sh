@@ -140,11 +140,8 @@ fi
 
 # Split the .o5m file for mkgmap
 echo -e "${Yel}Splitting the o5m file for mkgmap...${RCol}";
-if [ -d "${DIR_MAP}" ]; then
-	rm -fR ${DIR_MAP}
-fi
-mkdir ${DIR_MAP}
 cd ${DIR_MAP}
+ls | grep -v '.gitignore' | xargs rm -f
 java -Xmx${JAVA_XMX} -jar ${DIR_BIN}/splitter/splitter.jar \
  --mapid=53267593 \
  --mixed=yes \

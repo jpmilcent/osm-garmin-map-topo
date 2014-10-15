@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 # Generate for France a topographic gmapsupp.img file to use with Garmin GPS
+# See : <http://wiki.openstreetmap.org/wiki/OSM_Map_on_Garmin/Contours_using_phygtmap>
 # It uses the data from : 
 # - OpenStreetMap : http://www.openstreetmap.org/copyright
 # - Nasa : http://www2.jpl.nasa.gov/srtm/
@@ -40,10 +41,6 @@ else
 	exit;
 fi
 
-if [ -d "${DIR_MAP}" ]; then
-	rm -fR ${DIR_MAP}
-fi
-
 # Check dependancies
 type java >/dev/null 2>&1 || { echo >&2 -e "${Red}I require phyghtmap but it's not installed. Aborting.${RCol}"; exit 1; }
 type phyghtmap >/dev/null 2>&1 || { echo >&2 -e "${Red}I require phyghtmap but it's not installed. Aborting. See : http://katze.tfiu.de/projects/phyghtmap/${RCol}"; exit 1; }
@@ -71,29 +68,28 @@ fi
 
 # Configure style & data
 if [ ! -f ${DIR_STYLE}/lines ] ; then
-	mv ${DIR_STYLE}/lines.defaut ${DIR_STYLE}/lines
+	cp ${DIR_STYLE}/lines.default ${DIR_STYLE}/lines
 fi
 if [ ! -f ${DIR_STYLE}/options ] ; then
-	mv ${DIR_STYLE}/options.defaut ${DIR_STYLE}/options
+	cp ${DIR_STYLE}/options.default ${DIR_STYLE}/options
 fi
 if [ ! -f ${DIR_STYLE}/version ] ; then
-	mv ${DIR_STYLE}/version.defaut ${DIR_STYLE}/version
+	cp ${DIR_STYLE}/version.default ${DIR_STYLE}/version
 fi
 if [ ! -f ${DIR_DATA}/contours.txt ] ; then
-	mv ${DIR_DATA}/contours.default.txt ${DIR_DATA}/contours.txt
+	cp ${DIR_DATA}/contours.default.txt ${DIR_DATA}/contours.txt
 fi
 
 # Create pbf files for topo
 echo -e "${Yel}Downloading hgt files and creating correspondent pbf files...${RCol}";
-#cd ${DIR_CT}
-#rm -f *.pbf 
-#phyghtmap --step=${PHY_MINOR_LINE} --line-cat=${PHY_MAJOR_LINE},${PHY_MEDIUM_LINE} --polygon=${DIR_POLY}/${AREA}.poly --pbf --output-prefix=contour --hgtdir=${DIR_HGT}
+cd ${DIR_CT}
+rm -f *.pbf 
+phyghtmap --step=${PHY_MINOR_LINE} --line-cat=${PHY_MAJOR_LINE},${PHY_MEDIUM_LINE} --polygon=${DIR_POLY}/${AREA}.poly --pbf --output-prefix=contour --hgtdir=${DIR_HGT}
 
 # Création du fichier .img contenant seulement les données OSM à partir des morceaux découpés
 echo -e "${Yel}Creating the gmapsupp.img topo file with mkgmap...${RCol}";
-rm -fR ${DIR_CTO}
-mkdir ${DIR_CTO}
 cd ${DIR_CTO}
+ls | grep -v '.gitignore' | xargs rm -f
 java -Xmx${JAVA_XMX} -jar ${DIR_BIN}/mkgmap/mkgmap.jar \
  --max-jobs=${MKGMAP_MAX_JOBS} \
  --keep-going \
