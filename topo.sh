@@ -11,11 +11,48 @@
 # Copyright Jean-Pascal Milcent, 2014
 # Dependances : java, mkgmap, python, phyghtmap
 
+
+DIR_BASE=$(pwd)
 TIME_START=$(date +%s)
 AREA="france"
 AREA_NAME="France topo"
 AREA_CODE="FR"
-DIR_BASE=$(pwd)
+MAP_NAME=20130001
+
+while getopts "hc:a:n:i:" option
+do
+	case $option in
+		h)
+			echo "Usage: map.sh [options]"
+			echo "Options:"
+			echo "-h		show this help message and exit."
+			echo "-a		name of country (see download.geofabrik.de) for which you want to generate a Garmin img file. Default : france"
+			echo "-n		name that you want to give to this map. Default : France topo"
+			echo "-c		code that you want to give to this map. Default : FR"
+			echo "-m		map name for mkgmap --mapname option. Default : 20130001"
+			;;
+		a)
+			AREA=$OPTARG
+			;;
+		n)
+			AREA_NAME=$OPTARG
+			;;
+		c)
+			AREA_CODE=$OPTARG
+			;;
+		m)
+			MAP_NAME=$OPTARG
+			;;
+		:)
+			echo "L'option $OPTARG requiert un argument"
+			exit 1
+			;;
+		\?)
+			echo "$OPTARG : option invalide"
+			exit 1
+			;;
+	esac
+done
 
 # Functions
 function displaytime {
@@ -84,7 +121,13 @@ fi
 echo -e "${Yel}Downloading hgt files and creating correspondent pbf files...${RCol}";
 cd ${DIR_CT}
 rm -f *.pbf 
-phyghtmap --step=${PHY_MINOR_LINE} --line-cat=${PHY_MAJOR_LINE},${PHY_MEDIUM_LINE} --polygon=${DIR_POLY}/${AREA}.poly --pbf --output-prefix=contour --hgtdir=${DIR_HGT}
+phyghtmap -j ${PHY_MAX_JOBS} \
+ --step=${PHY_MINOR_LINE} \
+ --line-cat=${PHY_MAJOR_LINE},${PHY_MEDIUM_LINE} \
+ --polygon=${DIR_POLY}/${AREA}.poly \
+ --pbf \
+ --output-prefix=contour \
+ --hgtdir=${DIR_HGT}
 
 # Création du fichier .img contenant seulement les données OSM à partir des morceaux découpés
 echo -e "${Yel}Creating the gmapsupp.img topo file with mkgmap...${RCol}";
@@ -94,7 +137,7 @@ java -Xmx${JAVA_XMX} -jar ${DIR_BIN}/mkgmap/mkgmap.jar \
  --max-jobs=${MKGMAP_MAX_JOBS} \
  --keep-going \
  --gmapsupp \
- --mapname=20130001 \
+ --mapname="${MAP_NAME}" \
  --description="${AREA_NAME}" \
  --area-name="${AREA_NAME}" \
  --country-name="${AREA_NAME}" \

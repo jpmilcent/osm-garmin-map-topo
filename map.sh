@@ -8,10 +8,47 @@
 # Copyright Jean-Pascal Milcent, 2014
 # Dependances : java, mkgmap, splitter, osm-c-tools (osmconvert, osmupdate)
 
+DIR_BASE=$(pwd)
 TIME_START=$(date +%s)
+CONTINENT="europe"
 AREA="france"
 AREA_NAME="France"
-DIR_BASE=$(pwd)
+MAP_ID="53267593"
+
+while getopts "hc:a:n:i:" option
+do
+	case $option in
+		h)
+			echo "Usage: map.sh [options]"
+			echo "Options:"
+			echo "-h		show this help message and exit."
+			echo "-c		name of continent (see download.geofabrik.de) where the area is. Default : europe"
+			echo "-a		name of country (see download.geofabrik.de) for which you want to generate a Garmin img file. Default : france"
+			echo "-n		name that you want to give to this map. Default : France"
+			echo "-i		map id for splitter --mapid option. Default : 53267593"
+			;;
+		c)
+			CONTINENT=$OPTARG
+			;;
+		a)
+			AREA=$OPTARG
+			;;
+		n)
+			AREA_NAME=$OPTARG
+			;;
+		i)
+			MAP_ID=$OPTARG
+			;;
+		:)
+			echo "L'option $OPTARG requiert un argument"
+			exit 1
+			;;
+		\?)
+			echo "$OPTARG : option invalide"
+			exit 1
+			;;
+	esac
+done
 
 # Functions
 function ageEnSeconde {
@@ -99,8 +136,8 @@ fi
 # Maintain up to date the .osm.pbf file
 if [ ! -f "${DIR_OSM}/${AREA}-latest.osm.pbf" ] ; then
 	echo -e "${Yel}Downloading initial PBF file for area «${AREA}»...${RCol}";
-	if [ $AREA == "france" ] ; then
-		URL="http://download.geofabrik.de/europe/${AREA}-latest.osm.pbf"
+	if [ $CONTINENT != "" ] ; then
+		URL="http://download.geofabrik.de/${CONTINENT}/${AREA}-latest.osm.pbf"
 	else
 		URL="http://download.geofabrik.de/${AREA}-latest.osm.pbf"
 	fi
@@ -135,15 +172,15 @@ if [ ! -f "${DIR_OSM}/${AREA}.o5m" ] || [ `ageEnSeconde "${DIR_OSM}/${AREA}.o5m"
 	if [ -f "${DIR_OSM}/${AREA}.o5m" ] ; then
 		rm -f ${DIR_OSM}/${AREA}.o5m
 	fi
-	${DIR_BIN}/osmconvert --drop-version ${DIR_OSM}/${AREA}-latest.osm.pbf -o=${DIR_OSM}/france.o5m
+	${DIR_BIN}/osmconvert --drop-version ${DIR_OSM}/${AREA}-latest.osm.pbf -o=${DIR_OSM}/${AREA}.o5m
 fi
 
 # Split the .o5m file for mkgmap
 echo -e "${Yel}Splitting the o5m file for mkgmap...${RCol}";
 cd ${DIR_MAP}
-ls | grep -v '.gitignore' | xargs rm -f
+ls | grep -v '.gitignore' | xargs rm -fR
 java -Xmx${JAVA_XMX} -jar ${DIR_BIN}/splitter/splitter.jar \
- --mapid=53267593 \
+ --mapid=${MAP_ID} \
  --mixed=yes \
  --max-nodes=5000000 \
  --output-dir=./splitter-out \
