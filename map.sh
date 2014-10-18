@@ -14,8 +14,9 @@ CONTINENT="europe"
 AREA="france"
 AREA_NAME="France"
 MAP_ID="53267593"
+TO_MERGE="false"
 
-while getopts "hc:a:n:i:" option
+while getopts "hc:a:n:i:m" option
 do
 	case $option in
 		h)
@@ -26,6 +27,7 @@ do
 			echo "-a		name of country (see download.geofabrik.de) for which you want to generate a Garmin img file. Default : france"
 			echo "-n		name that you want to give to this map. Default : France"
 			echo "-i		map id for splitter --mapid option. Default : 53267593"
+			echo "-f		use this, if you want merge the gmapsupp.img file with another. Active the --remove-ovm-work-files option for mkgmap."
 			;;
 		c)
 			CONTINENT=$OPTARG
@@ -38,6 +40,9 @@ do
 			;;
 		i)
 			MAP_ID=$OPTARG
+			;;
+		f)
+			TO_MERGE="true"
 			;;
 		:)
 			echo "L'option $OPTARG requiert un argument"
@@ -189,7 +194,11 @@ java -Xmx${JAVA_XMX} -jar ${DIR_BIN}/splitter/splitter.jar \
 
 # Create the .img file with the o5m file split parts
 echo -e "${Yel}Creating the gmapsupp.img file with mkgmap...${RCol}";
-java -Xms${JAVA_XMX} -jar ${DIR_BIN}/mkgmap/mkgmap.jar -c ./splitter-out/template.args --gmapsupp
+java -Xms${JAVA_XMX} \
+	-jar ${DIR_BIN}/mkgmap/mkgmap.jar \
+	-c ./splitter-out/template.args \
+	--remove-ovm-work-files=${TO_MERGE} \
+	--gmapsupp 
 
 # Rename and save the gmapsupp.img file
 if [ -f gmapsupp.img ] ; then

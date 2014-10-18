@@ -18,8 +18,9 @@ AREA="france"
 AREA_NAME="France topo"
 AREA_CODE="FR"
 MAP_NAME=20130001
+TO_MERGE="false"
 
-while getopts "hc:a:n:i:" option
+while getopts "hc:a:n:i:m:f" option
 do
 	case $option in
 		h)
@@ -29,7 +30,8 @@ do
 			echo "-a		name of country (see download.geofabrik.de) for which you want to generate a Garmin img file. Default : france"
 			echo "-n		name that you want to give to this map. Default : France topo"
 			echo "-c		code that you want to give to this map. Default : FR"
-			echo "-m		map name for mkgmap --mapname option. Default : 20130001"
+			echo "-m		map name for the --mapnam mkgmap option. Default : 20130001"
+			echo "-f		use this, if you want merge the gmapsupp.img file with another. Active the --remove-ovm-work-files option for mkgmap."
 			;;
 		a)
 			AREA=$OPTARG
@@ -42,6 +44,9 @@ do
 			;;
 		m)
 			MAP_NAME=$OPTARG
+			;;
+		f)
+			TO_MERGE="true"
 			;;
 		:)
 			echo "L'option $OPTARG requiert un argument"
@@ -145,6 +150,7 @@ java -Xmx${JAVA_XMX} -jar ${DIR_BIN}/mkgmap/mkgmap.jar \
  --precomp-sea=${DIR_DATA}/sea_${SEA_VERSION}.zip \
  --read-config=${DIR_STYLE}/options \
  --style-file=${DIR_STYLE} \
+ --remove-ovm-work-files=${TO_MERGE} \
  ${DIR_DATA}/contours.txt ${DIR_CT}/*.pbf
 
 # Rename and save the gmapsupp.img file
